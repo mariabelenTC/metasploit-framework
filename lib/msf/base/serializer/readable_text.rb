@@ -257,7 +257,7 @@ class ReadableText
 
     # Check
     output << "Check supported:\n"
-    output << "#{indent}#{mod.has_check? ? 'Yes' : 'No'}\n\n"
+    output << "#{indent}#{mod.respond_to?(:check) ? 'Yes' : 'No'}\n\n"
 
     # Options
     if (mod.options.has_options?)
@@ -286,8 +286,8 @@ class ReadableText
     # References
     output << dump_references(mod, indent)
 
-    # Notes
-    output << dump_notes(mod, indent)
+    # AKA
+    output << dump_aka(mod, indent)
 
     return output
 
@@ -323,9 +323,8 @@ class ReadableText
     end
 
     # Check
-    has_check = mod.has_check?
     output << "Check supported:\n"
-    output << "#{indent}#{has_check ? 'Yes' : 'No'}\n\n"
+    output << "#{indent}#{mod.respond_to?(:check) ? 'Yes' : 'No'}\n\n"
 
     # Options
     if (mod.options.has_options?)
@@ -342,8 +341,8 @@ class ReadableText
     # References
     output << dump_references(mod, indent)
 
-    # Notes
-    output << dump_notes(mod, indent)
+    # AKA
+    output << dump_aka(mod, indent)
 
     return output
   end
@@ -402,8 +401,8 @@ class ReadableText
     # References
     output << dump_references(mod, indent)
 
-    # Notes
-    output << dump_notes(mod, indent)
+    # AKA
+    output << dump_aka(mod, indent)
 
     return output
   end
@@ -434,7 +433,7 @@ class ReadableText
 
     # Check
     output << "Check supported:\n"
-    output << "#{indent}#{mod.has_check? ? 'Yes' : 'No'}\n\n"
+    output << "#{indent}#{mod.respond_to?(:check) ? 'Yes' : 'No'}\n\n"
 
     # Options
     if (mod.options.has_options?)
@@ -534,6 +533,62 @@ class ReadableText
   def self.dump_generic_module(mod, indent = '')
   end
 
+
+
+  #Check a condition's result
+  def self.condition_result(left_value, operator, right_value)
+    result = false
+
+    if operator == "=="
+      result = left_value == right_value
+    elsif operator == "!="
+      result = left_value != right_value
+    elsif operator == "in"
+      right_value = right_value.split(',')
+      result = right_value.include?(left_value)
+    elsif operator == "nin"
+      right_value = right_value.split(',')
+      result = right_value.include?(left_value)
+      result = !result
+    else
+      result = true
+    end
+
+    result
+
+  end
+
+
+
+  #Check an OPTION conditions. This function supports
+  #self.dump_options()
+
+  def self.opt_condition_checked(condition, mod, opt)
+    result = false      
+
+    operator = condition[1]
+    right_value = condition[2]
+
+    if condition != [] and condition[0][0..5] == "OPTION"
+      left_name = condition[0][7..10]
+      left_value = mod.datastore[left_name].nil? ? opt.default : mod.datastore[left_name]
+
+      result = condition_result(left_value, operator, right_value)
+
+    elsif condition != [] and condition[0] == "ACTION"
+      left_value = mod.action.name.to_s
+      result = condition_result(left_value, operator, right_value)
+
+    elsif condition != [] and condition[0] == "TARGET"
+      left_value = mod.target.name.to_s
+      result = condition_result(left_value, operator, right_value)
+    else
+      result = true
+    end
+    result
+  end 
+
+
   # Dumps the list of options associated with the
   # supplied module.
   #
@@ -549,33 +604,37 @@ class ReadableText
           'Name',
           'Current Setting',
           'Required',
-          'Description'
+          'Description',
+          'Conditions'
         ])
 
+
     mod.options.sorted.each do |name, opt|
-      val = mod.datastore[name].nil? ? opt.default : mod.datastore[name]
+      if opt_condition_checked(opt.conditions?, mod, opt)
+        val = mod.datastore[name].nil? ? opt.default : mod.datastore[name]
+        next if (opt.advanced?)
+        next if (opt.evasion?)
+        next if (missing && opt.valid?(val))
 
-      next if (opt.advanced?)
-      next if (opt.evasion?)
-      next if (missing && opt.valid?(val))
-
-      desc = opt.desc.dup
-
-      # Hint at RPORT proto by regexing mixins
-      if name == 'RPORT' && opt.kind_of?(Msf::OptPort)
-        mod.class.included_modules.each do |m|
-          case m.name
-          when /tcp/i, /HttpClient$/
-            desc << ' (TCP)'
-            break
-          when /udp/i
-            desc << ' (UDP)'
-            break
+        desc = opt.desc.dup
+  
+     # Hint at RPORT proto by regexing mixins
+        if name == 'RPORT' && opt.kind_of?(Msf::OptPort)
+          mod.class.included_modules.each do |m|
+            case m.name
+            when /tcp/i, /HttpClient$/
+              desc << ' (TCP)'
+              break
+            when /udp/i
+              desc << ' (UDP)'
+              break
+            end
           end
         end
+
+        tbl << [ name, opt.display_value(val), opt.required? ? "yes" : "no", desc, opt.str_conditions?]
       end
 
-      tbl << [ name, opt.display_value(val), opt.required? ? "yes" : "no", desc ]
     end
 
     return tbl.to_s
@@ -642,8 +701,19 @@ class ReadableText
     if (mod.respond_to?(:references) && mod.references && mod.references.length > 0)
       output << "References:\n"
 
+      cve_collection = mod.references.select { |r| r.ctx_id.match(/^cve$/i) }
+      if cve_collection.empty?
+        output << "#{indent}CVE: Not available\n"
+      end
+
       mod.references.each do |ref|
         case ref.ctx_id
+        when 'CVE', 'cve'
+          if !cve_collection.empty? && ref.ctx_val.blank?
+            output << "#{indent}CVE: Not available\n"
+          else
+            output << indent + ref.to_s + "\n"
+          end
         when 'LOGO', 'SOUNDTRACK'
           output << indent + ref.to_s + "\n"
           Rex::Compat.open_browser(ref.ctx_val) if Rex::Compat.getenv('FUEL_THE_HYPE_MACHINE')
@@ -658,42 +728,19 @@ class ReadableText
     output
   end
 
-  # Dumps the notes associated with the supplied module.
+  # Dumps the aka names associated with the supplied module.
   #
   # @param mod [Msf::Module] the module.
   # @param indent [String] the indentation to use.
   # @return [String] the string form of the information.
-  def self.dump_notes(mod, indent = '')
+  def self.dump_aka(mod, indent = '')
     output = ''
 
-    mod.notes.each do |name, val|
-      next unless val.present?
+    if mod.notes['AKA'].present?
+      output << "AKA:\n"
 
-      case name
-      when 'AKA'
-        output << "Also known as:\n"
-        val.each { |aka| output << "#{indent}#{aka}\n" }
-      when 'NOCVE'
-        output << "CVE not available for the following reason:\n" \
-                  "#{indent}#{val}\n"
-      when 'RelatedModules'
-        output << "Related modules:\n"
-        val.each { |related| output << "#{indent}#{related}\n" }
-      when 'Stability', 'SideEffects', 'Reliability'
-        # Handled by dump_traits
-        next
-      else
-        output << "#{name}:\n"
-
-        case val
-        when Array
-          val.each { |v| output << "#{indent}#{v}\n" }
-        when Hash
-          val.each { |k, v| output << "#{indent}#{k}: #{v}\n" }
-        else
-          # Display the raw note
-          output << "#{indent}#{val}\n"
-        end
+      mod.notes['AKA'].each do |aka_name|
+        output << indent + aka_name + "\n"
       end
 
       output << "\n"

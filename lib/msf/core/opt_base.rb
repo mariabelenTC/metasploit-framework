@@ -19,19 +19,19 @@ module Msf
     # attrs[0] = required (boolean type)
     # attrs[1] = description (string)
     # attrs[2] = default value
-    # attrs[3] = possible enum values
+    # attrs[3] = possible enum values 
+    # attrs[3] = possible conditions
     # attrs[4] = Regex to validate the option
     #
     # Attrs can also be specified explicitly via named parameters, or attrs can
     # also be a string as standin for the required description field.
     #
     def initialize(in_name, attrs = [],
-                   required: false, desc: nil, default: nil, enums: [], regex: nil, aliases: [], max_length: nil)
+                   required: false, desc: nil, default: nil, conditions: [], enums: [], regex: nil, aliases: [])
       self.name     = in_name
       self.advanced = false
       self.evasion  = false
       self.aliases  = aliases
-      self.max_length = max_length
 
       if attrs.is_a?(String) || attrs.length == 0
         self.required = required
@@ -51,15 +51,12 @@ module Msf
         end
         self.desc     = attrs[1] || desc
         self.default  = attrs[2] || default
+        self.conditions = attrs[3] || conditions
         self.enums    = attrs[3] || enums
         self.enums    = [ *(self.enums) ].map { |x| x.to_s }
         regex_temp    = attrs[4] || regex
       end
 
-      unless max_length.nil?
-        self.desc += " Max parameter length: #{max_length} characters"
-      end
-      
       if regex_temp
         # convert to string
         regex_temp = regex_temp.to_s if regex_temp.is_a? Regexp
@@ -75,6 +72,22 @@ module Msf
         end
       end
     end
+
+
+    
+    # Returns the conditions.
+    #
+    def conditions?
+      enums
+    end
+
+    # Returns the conditions in text mode.
+    #
+    def str_conditions?
+      enums
+    end
+
+
 
     #
     # Returns true if this is a required option.
@@ -149,15 +162,6 @@ module Msf
     end
 
     #
-    # Returns true if the value supplied is longer then the max allowed length
-    #
-    def invalid_value_length?(value)
-      if !value.nil? && !max_length.nil?
-        value.length > max_length
-      end
-    end
-
-    #
     # The name of the option.
     #
     attr_reader   :name
@@ -192,7 +196,11 @@ module Msf
     #
     # The list of potential valid values
     #
-    attr_accessor :enums
+    attr_accessor :conditions
+    #
+    # The list of potencial conditions
+    #
+    attr_accessor :enums    
     #
     # A optional regex to validate the option value
     #
@@ -201,11 +209,7 @@ module Msf
     # Aliases for this option for backward compatibility
     #
     attr_accessor :aliases
-    # 
-    # The max length of the input value
-    #
-    attr_accessor :max_length
-    
+
     protected
 
     attr_writer   :required, :desc, :default # :nodoc:
