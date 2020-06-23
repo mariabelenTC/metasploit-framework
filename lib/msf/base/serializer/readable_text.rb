@@ -540,14 +540,15 @@ class ReadableText
   def self.condition_result(left_value, operator, right_value)
     result = false
 
-    if operator == "=="
+    case operator
+    when "=="
       result = left_value == right_value
-    elsif operator == "!="
+    when "!="
       result = left_value != right_value
-    elsif operator == "in"
+    when "in"
 #      right_value = right_value.split(',')
       result = right_value.include?(left_value)
-    elsif operator == "nin"
+    when "nin"
       right_value = right_value.split(',')
       result = right_value.include?(left_value)
       result = !result
