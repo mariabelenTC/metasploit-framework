@@ -545,7 +545,7 @@ class ReadableText
     elsif operator == "!="
       result = left_value != right_value
     elsif operator == "in"
-      right_value = right_value.split(',')
+#      right_value = right_value.split(',')
       result = right_value.include?(left_value)
     elsif operator == "nin"
       right_value = right_value.split(',')
@@ -567,22 +567,29 @@ class ReadableText
   def self.opt_condition_checked(condition, mod, opt)
     result = false
 
-    operator = condition[1]
-    right_value = condition[2]
+    condition = condition.nil? ? "nil" : condition
 
-    if condition != [] and condition[0][0..5] == "OPTION"
-      left_name = condition[0][7..10]
-      left_value = mod.datastore[left_name].nil? ? opt.default : mod.datastore[left_name]
+    if ((condition != []) and (condition != "nil"))
+      operator = condition[1]
+      right_value = condition[2]
+      print(operator)
 
-      result = condition_result(left_value, operator, right_value)
+      if condition[0][0..5] == "OPTION"
+        left_name = condition[0][7..10]
+        left_value = mod.datastore[left_name].nil? ? opt.default : mod.datastore[left_name]
+        result = condition_result(left_value, operator, right_value)
 
-    elsif condition != [] and condition[0] == "ACTION"
-      left_value = mod.action.name.to_s
-      result = condition_result(left_value, operator, right_value)
+      elsif condition != [] and condition[0] == "ACTION"
+        left_value = mod.action.name.to_s
+        result = condition_result(left_value, operator, right_value)
 
-    elsif condition != [] and condition[0] == "TARGET"
-      left_value = mod.target.name.to_s
-      result = condition_result(left_value, operator, right_value)
+      elsif condition != [] and condition[0] == "TARGET"
+        left_value = mod.target.name.to_s
+        result = condition_result(left_value, operator, right_value)
+      else
+        result = true
+      end
+
     else
       result = true
     end
@@ -612,7 +619,8 @@ class ReadableText
 
 
     mod.options.sorted.each do |name, opt|
-      if opt_condition_checked(opt.conditions?, mod, opt)
+
+      if (opt_condition_checked(opt.conditions?, mod, opt))
         val = mod.datastore[name].nil? ? opt.default : mod.datastore[name]
         next if (opt.advanced?)
         next if (opt.evasion?)
@@ -641,6 +649,7 @@ class ReadableText
 
     return tbl.to_s
   end
+
 
 
   # Dumps the advanced options associated with the supplied module.

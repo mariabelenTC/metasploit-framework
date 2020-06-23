@@ -78,16 +78,14 @@ module Msf
     # Returns the conditions.
     #
     def conditions?
-      enums
+      conditions
     end
 
     # Returns the conditions in text mode.
     #
     def str_conditions?
-      enums
+      conditions.to_s
     end
-
-
 
     #
     # Returns true if this is a required option.
