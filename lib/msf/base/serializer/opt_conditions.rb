@@ -5,8 +5,7 @@ module Msf
 
       #Check a condition's result
       def self.condition_result(left_value, operator, right_value)
-        result = false
-        puts("OPTION")
+        result = true
         case operator
         when "=="
           result = left_value == right_value
@@ -17,8 +16,6 @@ module Msf
         when "nin"
           result = right_value.include?(left_value)
           result = !result
-        else
-          result = true
         end
 
         result
