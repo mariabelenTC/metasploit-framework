@@ -3,7 +3,7 @@ module Msf
   module Serializer
     module OptConditions
 
-      #Check a condition's result
+      # Check a condition's result
       def self.eval_condition(left_value, operator, right_value)
         result = true
         case operator
@@ -22,11 +22,8 @@ module Msf
 
       end
 
-
-
-      #Check an OPTION conditions. This function supports
-      #self.dump_options()
-
+      # Check an OPTION conditions. This function supports
+      # dump_options()
       def self.opt_condition_checked(condition, mod, opt)
         result = false
 
