@@ -20,7 +20,6 @@ module Msf
     # attrs[1] = description (string)
     # attrs[2] = default value
     # attrs[3] = possible enum values 
-    # attrs[3] = possible conditions
     # attrs[4] = Regex to validate the option
     #
     # Attrs can also be specified explicitly via named parameters, or attrs can

@@ -4,7 +4,7 @@ module Msf
     module OptConditions
 
       #Check a condition's result
-      def self.condition_result(left_value, operator, right_value)
+      def self.eval_condition(left_value, operator, right_value)
         result = true
         case operator
         when "=="
@@ -39,15 +39,15 @@ module Msf
           if condition[0][0..5] == "OPTION"
             left_name = condition[0][7..10]
             left_value = mod.datastore[left_name].nil? ? opt.default : mod.datastore[left_name]
-            result = condition_result(left_value, operator, right_value)
+            result = eval_condition(left_value, operator, right_value)
 
           elsif condition != [] and condition[0] == "ACTION"
             left_value = mod.action.name.to_s
-            result = condition_result(left_value, operator, right_value)
+            result = eval_condition(left_value, operator, right_value)
 
           elsif condition != [] and condition[0] == "TARGET"
             left_value = mod.target.name.to_s
-            result = condition_result(left_value, operator, right_value)
+            result = eval_condition(left_value, operator, right_value)
           else
             result = true
           end
