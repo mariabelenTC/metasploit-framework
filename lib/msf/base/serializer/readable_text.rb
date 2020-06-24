@@ -1,4 +1,7 @@
 # -*- coding: binary -*-
+
+require 'msf/base/serializer/opt_conditions'
+
 module Msf
 module Serializer
 
@@ -558,7 +561,7 @@ class ReadableText
 
     mod.options.sorted.each do |name, opt|
 
-      if (opt_condition_checked(opt.conditions?, mod, opt))
+      if (Msf::Serializer::OptConditions.opt_condition_checked(opt.conditions?, mod, opt))
         val = mod.datastore[name].nil? ? opt.default : mod.datastore[name]
         next if (opt.advanced?)
         next if (opt.evasion?)
