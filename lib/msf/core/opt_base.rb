@@ -1,4 +1,4 @@
-# -*- coding: binary -*-
+ -*- coding: binary -*-
 require 'resolv'
 require 'msf/core'
 require 'rex/socket'
@@ -74,7 +74,7 @@ module Msf
     end
 
 
-    
+
     # Returns the conditions.
     #
     def conditions?
@@ -198,7 +198,7 @@ module Msf
     #
     # The list of potencial conditions
     #
-    attr_accessor :enums    
+    attr_accessor :enums
     #
     # A optional regex to validate the option value
     #
