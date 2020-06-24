@@ -35,7 +35,6 @@ module Msf
         if ((condition != []) and (condition != "nil"))
           operator = condition[1]
           right_value = condition[2]
-          print(operator)
 
           if condition[0][0..5] == "OPTION"
             left_name = condition[0][7..10]
