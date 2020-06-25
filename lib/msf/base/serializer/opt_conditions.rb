@@ -27,8 +27,6 @@ module Msf
       def self.opt_condition_checked(condition, mod, opt)
         result = false
 
-        condition = condition.nil? ? "nil" : condition
-
         if ((condition != []) and (condition != "nil"))
           operator = condition[1]
           right_value = condition[2]
@@ -48,9 +46,6 @@ module Msf
           else
             result = true
           end
-
-        else
-          result = true
         end
         result
       end
