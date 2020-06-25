@@ -554,8 +554,7 @@ class ReadableText
           'Name',
           'Current Setting',
           'Required',
-          'Description',
-          'Conditions'
+          'Description'
         ])
 
 
@@ -583,7 +582,7 @@ class ReadableText
           end
         end
 
-        tbl << [ name, opt.display_value(val), opt.required? ? "yes" : "no", desc, opt.str_conditions?]
+        tbl << [ name, opt.display_value(val), opt.required? ? "yes" : "no", desc]
       end
 
     end

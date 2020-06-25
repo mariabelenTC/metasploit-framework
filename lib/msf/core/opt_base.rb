@@ -80,12 +80,6 @@ module Msf
       conditions
     end
 
-    # Returns the conditions in text mode.
-    #
-    def str_conditions?
-      conditions.to_s
-    end
-
     #
     # Returns true if this is a required option.
     #
