@@ -559,8 +559,7 @@ class ReadableText
 
 
     mod.options.sorted.each do |name, opt|
-
-      if (Msf::Serializer::OptConditions.opt_condition_checked(opt.conditions?, mod, opt))
+      next if !Msf::Serializer::OptConditions.opt_condition_checked(opt.conditions, mod, opt)
         val = mod.datastore[name].nil? ? opt.default : mod.datastore[name]
         next if (opt.advanced?)
         next if (opt.evasion?)
@@ -583,8 +582,6 @@ class ReadableText
         end
 
         tbl << [ name, opt.display_value(val), opt.required? ? "yes" : "no", desc]
-      end
-
     end
 
     return tbl.to_s
