@@ -31,6 +31,7 @@ module Msf
       self.advanced = false
       self.evasion  = false
       self.aliases  = aliases
+      self.conditions = conditions
 
       if attrs.is_a?(String) || attrs.length == 0
         self.required = required
@@ -50,7 +51,6 @@ module Msf
         end
         self.desc     = attrs[1] || desc
         self.default  = attrs[2] || default
-        self.conditions = conditions
         self.enums    = attrs[3] || enums
         self.enums    = [ *(self.enums) ].map { |x| x.to_s }
         regex_temp    = attrs[4] || regex
