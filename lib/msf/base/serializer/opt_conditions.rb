@@ -32,7 +32,7 @@ module Msf
           right_value = condition[2]
 
           if condition[0][0..5] == "OPTION"
-            left_name = condition[0][7..10]
+            left_name = condition[0].split(/\(([^)]+)\)/)[1]
             left_value = mod.datastore[left_name].nil? ? opt.default : mod.datastore[left_name]
             result = eval_condition(left_value, operator, right_value)
 
