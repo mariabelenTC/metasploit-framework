@@ -19,19 +19,20 @@ module Msf
     # attrs[0] = required (boolean type)
     # attrs[1] = description (string)
     # attrs[2] = default value
-    # attrs[3] = possible enum values 
+    # attrs[3] = possible enum values
     # attrs[4] = Regex to validate the option
     #
     # Attrs can also be specified explicitly via named parameters, or attrs can
     # also be a string as standin for the required description field.
     #
     def initialize(in_name, attrs = [],
-                   required: false, desc: nil, default: nil, conditions: [], enums: [], regex: nil, aliases: [])
+                   required: false, desc: nil, default: nil, conditions: [], enums: [], regex: nil, aliases: [], max_length: nil)
       self.name     = in_name
       self.advanced = false
       self.evasion  = false
       self.aliases  = aliases
       self.conditions = conditions
+      self.max_length = max_length
 
       if attrs.is_a?(String) || attrs.length == 0
         self.required = required
@@ -56,6 +57,10 @@ module Msf
         regex_temp    = attrs[4] || regex
       end
 
+      unless max_length.nil?
+        self.desc += " Max parameter length: #{max_length} characters"
+      end
+      
       if regex_temp
         # convert to string
         regex_temp = regex_temp.to_s if regex_temp.is_a? Regexp
@@ -73,17 +78,16 @@ module Msf
     end
 
     #
-    # Returns the conditions.
-    #
-    def conditions?
-      conditions
-    end
-
-    #
     # Returns true if this is a required option.
     #
     def required?
       required
+    end
+
+    # Returns the conditions.
+    #
+    def conditions?
+      conditions
     end
 
     #
@@ -152,6 +156,15 @@ module Msf
     end
 
     #
+    # Returns true if the value supplied is longer then the max allowed length
+    #
+    def invalid_value_length?(value)
+      if !value.nil? && !max_length.nil?
+        value.length > max_length
+      end
+    end
+
+    #
     # The name of the option.
     #
     attr_reader   :name
@@ -186,20 +199,24 @@ module Msf
     #
     # The list of potential valid values
     #
-    attr_accessor :conditions
-    #
-    # The list of potencial conditions
-    #
     attr_accessor :enums
     #
     # A optional regex to validate the option value
+    #
+    attr_accessor :conditions
+    #
+    # The list of potencial conditions
     #
     attr_accessor :regex
     #
     # Aliases for this option for backward compatibility
     #
     attr_accessor :aliases
-
+    # 
+    # The max length of the input value
+    #
+    attr_accessor :max_length
+    
     protected
 
     attr_writer   :required, :desc, :default # :nodoc:
