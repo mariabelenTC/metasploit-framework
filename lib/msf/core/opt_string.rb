@@ -11,7 +11,7 @@ class OptString < OptBase
 
   # This adds a length parameter to check for the maximum length of strings.
   def initialize(in_name, attrs = [],
-               required: false, desc: nil, default: nil, enums: [], regex: nil, aliases: [], max_length: nil)
+               required: false, desc: nil, default: nil, conditions: [], enums: [], regex: nil, aliases: [], max_length: nil)
     super
   end
 
