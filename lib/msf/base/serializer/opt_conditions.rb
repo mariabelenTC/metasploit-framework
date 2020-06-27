@@ -19,15 +19,14 @@ module Msf
         end
 
         result
-
       end
 
       # Check an OPTION conditions. This function supports
       # dump_options()
       def self.opt_condition_checked(condition, mod, opt)
-        result = false
+        result = true
 
-        if ((condition != []) and (condition != "nil"))
+        if ((condition != []) and (condition != nil))
           operator = condition[1]
           right_value = condition[2]
 
