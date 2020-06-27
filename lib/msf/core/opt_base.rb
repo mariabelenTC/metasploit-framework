@@ -72,8 +72,7 @@ module Msf
       end
     end
 
-
-
+    #
     # Returns the conditions.
     #
     def conditions?
