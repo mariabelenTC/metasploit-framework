@@ -84,12 +84,6 @@ module Msf
       required
     end
 
-    # Returns the conditions.
-    #
-    def conditions?
-      conditions
-    end
-
     #
     # Returns true if this is an advanced option.
     #

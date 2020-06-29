@@ -42,8 +42,6 @@ module Msf
           elsif condition != [] and condition[0] == "TARGET"
             left_value = mod.target.name.to_s
             result = eval_condition(left_value, operator, right_value)
-          else
-            result = true
           end
         end
         result

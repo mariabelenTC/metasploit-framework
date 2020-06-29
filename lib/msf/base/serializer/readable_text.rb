@@ -560,28 +560,28 @@ class ReadableText
 
     mod.options.sorted.each do |name, opt|
       next unless Msf::Serializer::OptConditions.opt_condition_checked(opt.conditions, mod, opt)
-        val = mod.datastore[name].nil? ? opt.default : mod.datastore[name]
-        next if (opt.advanced?)
-        next if (opt.evasion?)
-        next if (missing && opt.valid?(val))
+      val = mod.datastore[name].nil? ? opt.default : mod.datastore[name]
+      next if (opt.advanced?)
+      next if (opt.evasion?)
+      next if (missing && opt.valid?(val))
 
-        desc = opt.desc.dup
+      desc = opt.desc.dup
 
-     # Hint at RPORT proto by regexing mixins
-        if name == 'RPORT' && opt.kind_of?(Msf::OptPort)
-          mod.class.included_modules.each do |m|
-            case m.name
-            when /tcp/i, /HttpClient$/
-              desc << ' (TCP)'
-              break
-            when /udp/i
-              desc << ' (UDP)'
-              break
-            end
+   # Hint at RPORT proto by regexing mixins
+      if name == 'RPORT' && opt.kind_of?(Msf::OptPort)
+        mod.class.included_modules.each do |m|
+          case m.name
+          when /tcp/i, /HttpClient$/
+            desc << ' (TCP)'
+            break
+          when /udp/i
+            desc << ' (UDP)'
+            break
           end
         end
+      end
 
-        tbl << [ name, opt.display_value(val), opt.required? ? "yes" : "no", desc]
+      tbl << [ name, opt.display_value(val), opt.required? ? "yes" : "no", desc ]
     end
 
     return tbl.to_s
