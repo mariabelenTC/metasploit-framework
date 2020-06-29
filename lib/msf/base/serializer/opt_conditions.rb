@@ -23,8 +23,9 @@ module Msf
 
       # Check an OPTION conditions. This function supports
       # dump_options()
-      def self.opt_condition_checked(condition, mod, opt)
+      def self.show_option(mod, opt)
         result = true
+        condition = opt.conditions
 
         if ((condition != []) and (condition != nil))
           operator = condition[1]
