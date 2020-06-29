@@ -27,23 +27,22 @@ module Msf
         result = true
         condition = opt.conditions
 
-        if ((condition != []) and (condition != nil))
-          operator = condition[1]
-          right_value = condition[2]
+        return true if condition.nil? || condition.empty?
+        operator = condition[1]
+        right_value = condition[2]
 
-          if condition[0][0..5] == "OPTION"
-            left_name = condition[0].split(/\(([^)]+)\)/)[1]
-            left_value = mod.datastore[left_name].nil? ? opt.default : mod.datastore[left_name]
-            result = eval_condition(left_value, operator, right_value)
+        if condition[0][0..5] == "OPTION"
+          left_name = condition[0].split(/\(([^)]+)\)/)[1]
+          left_value = mod.datastore[left_name].nil? ? opt.default : mod.datastore[left_name]
+          result = eval_condition(left_value, operator, right_value)
 
-          elsif condition != [] and condition[0] == "ACTION"
-            left_value = mod.action.name.to_s
-            result = eval_condition(left_value, operator, right_value)
+        elsif condition != [] and condition[0] == "ACTION"
+          left_value = mod.action.name.to_s
+          result = eval_condition(left_value, operator, right_value)
 
-          elsif condition != [] and condition[0] == "TARGET"
-            left_value = mod.target.name.to_s
-            result = eval_condition(left_value, operator, right_value)
-          end
+        elsif condition != [] and condition[0] == "TARGET"
+          left_value = mod.target.name.to_s
+          result = eval_condition(left_value, operator, right_value)
         end
         result
       end
