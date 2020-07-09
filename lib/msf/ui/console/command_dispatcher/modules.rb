@@ -52,6 +52,7 @@ module Msf
               "search"     => "Searches module names and descriptions",
               "show"       => "Displays modules of a given type, or all modules",
               "use"        => "Interact with a module by name or search term/index",
+              "action"     => "Execute module action"
             }
           end
 
@@ -74,6 +75,42 @@ module Msf
           #
           def name
             "Module"
+          end
+
+          def cmd_action_help
+            print_line 'Usage: action [action_name]'
+            print_line
+            print_line 'Executes the module’s code according to the given action. If no action name is given, the current one is executed.'
+            print_line 'show actions to check the possible action values for the currently active module.'
+            print_line
+            print_line 'show options to check the current action value for the currently active module.'
+            print_line
+          end
+
+          def cmd_action(*args)
+            if args.empty?
+              print_error("Argument required\n")
+              cmd_action_help
+              return
+            end
+            action=args.map{ |i|  %Q(#{i}) }.join(' ')
+            mod = self.active_module
+            args.each { |type|
+              case type
+                when '-h'
+                  cmd_action_help
+                when "actions"
+                  if mod && mod.kind_of?(Msf::Module::HasActions)
+                    show_actions(mod)
+                  else
+                    print_error("No module with actions selected.")
+                  end
+
+                else
+                  print "this is just a test text... "+args.map{ |i|  %Q(#{i}) }.join(' ')+ "\n"
+              end
+            }
+
           end
 
           def cmd_advanced_help
